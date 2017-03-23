@@ -40,6 +40,7 @@ function init() {
   async.series([
       _createExpressApp.bind(null, bag),
       _initializeDatabaseConfig.bind(null, bag),
+			_setGlobalMounts.bind(null, bag),
       _createClient.bind(null, bag),
       _initializeRoutes.bind(null, bag),
       _startListening.bind(null, bag),
@@ -143,6 +144,17 @@ function _initializeDatabaseConfig(bag, next) {
   return next();
 }
 
+function _setGlobalMounts(bag, next) {
+  var who = bag.who + '|' + _setGlobalMounts.name;
+  logger.debug(who, 'Inside');
+
+	global.config.runtimeDir = '/var/run/shippable';
+	global.config.configDir = '/etc/shippable';
+	global.config.srcDir = '/home/shippable/admiral';
+
+	return next();
+}
+
 function _createClient(bag, next) {
   var who = bag.who + '|' + _createClient.name;
   logger.debug(who, 'Inside');
@@ -211,6 +223,9 @@ function _setLogLevel(bag, next) {
   logger.debug('------------------------------------------------------------');
   logger.debug('------------------------------------------------------------');
   logger.debug('------------- Admiral Successfully booted ------------------');
+  logger.debug('------------------------------------------------------------');
+  logger.debug('------------------------------------------------------------');
+	logger.debug('Login token: ' + global.config.loginToken);
   logger.debug('------------------------------------------------------------');
   logger.debug('------------------------------------------------------------');
   /* jshint ignore:end*/

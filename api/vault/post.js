@@ -84,9 +84,13 @@ function _generateInitializeEnvs(bag, next) {
   var who = bag.who + '|' + _generateInitializeEnvs.name;
   logger.verbose(who, 'Inside');
 
-  //TODO:
-  //gather all the variables that will be injected in init script
-  //
+  bag.scriptEnvs = {
+    'RUNTIME_DIR': global.config.runtimeDir,
+    'CONFIG_DIR': global.config.configDir,
+    'SCRIPTS_DIR': path.join(global.config.srcDir, '/common/scripts'),
+    'IS_INITIALIZED': bag.vaultConfig.isInitialized,
+    'IS_INSTALLED': bag.vaultConfig.isInstalled
+  };
 
   return next();
 }
@@ -96,7 +100,7 @@ function _generateInitializeScript(bag, next) {
   logger.verbose(who, 'Inside');
 
   //attach header
-  var fileName = '../../lib/_logger.sh';
+  var fileName = '../../common/scripts/lib/_logger.sh';
   var headerScript = '';
   headerScript = headerScript.concat(__applyTemplate(fileName, bag.params));
 
@@ -133,20 +137,11 @@ function _initializeVault(bag, next) {
   var who = bag.who + '|' + _initializeVault.name;
   logger.verbose(who, 'Inside');
 
-  //TODO: these should come from env values
-  var scriptEnvs = {
-    'RUNTIME_DIR': '/var/run/shippable',
-    'CONFIG_DIR': '/etc/shippable',
-    'SCRIPTS_DIR': '/home/shippable/admiral/common/scripts',
-    'IS_INITIALIZED': bag.vaultConfig.isInitialized,
-    'IS_INSTALLED': bag.vaultConfig.isInstalled
-  };
-
   var exec = spawn('/bin/bash',
     ['-c', bag.tmpScript],
     {
       cwd: bag.buildRootDir,
-      env: scriptEnvs
+      env: bag.scriptEnvs
     }
   );
 
